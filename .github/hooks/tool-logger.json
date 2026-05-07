@@ -1,0 +1,20 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "bash .github/scripts/record-session-start.sh",
+        "timeout": 10,
+        "description": "Records detailed session metadata (user, git status, recent files) on startup"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "type": "command",
+        "command": "bash .github/scripts/log-tool-execution.sh",
+        "timeout": 5,
+        "description": "Logs all tool executions to .github/logs/tool-executions.log"
+      }
+    ]
+  }
+}
