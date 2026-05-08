@@ -56,8 +56,8 @@ export default function App() {
   return (
     <div class="app-root">
       <header class="top">
-        <h1 class="brand">Todo — SolidJS</h1>
-        <button class="theme" onClick={toggleTheme} aria-label="Toggle theme">
+        <h1 class="brand">TODO</h1>
+        <button class="theme" onClick={toggleTheme} aria-label={theme() === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
           {theme() === 'light' ? '🌙' : '☀️'}
         </button>
       </header>
@@ -66,11 +66,13 @@ export default function App() {
         <form class="add" onSubmit={addTodo}>
           <input
             class="input"
+            type="text"
             placeholder="What needs to be done?"
             value={text()}
             onInput={(e) => setText(e.target.value)}
+            aria-label="New todo description"
           />
-          <button class="btn">Add</button>
+          <button class="btn" aria-label="Add new todo">Add</button>
         </form>
 
         <div class="card">
@@ -78,27 +80,52 @@ export default function App() {
             <For each={filtered()}>{(todo) => (
               <li classList={{ item: true, completed: todo.completed }}>
                 <label class="left">
-                  <input type="checkbox" checked={todo.completed} onChange={() => toggleTodo(todo.id)} />
+                  <input 
+                    type="checkbox" 
+                    checked={todo.completed} 
+                    onChange={() => toggleTodo(todo.id)}
+                    aria-label={`Mark "${todo.text}" as ${todo.completed ? 'incomplete' : 'complete'}`}
+                  />
                   <span class="text">{todo.text}</span>
                 </label>
-                <button class="del" onClick={() => removeTodo(todo.id)} aria-label="Delete">✕</button>
+                <button 
+                  class="del" 
+                  onClick={() => removeTodo(todo.id)} 
+                  aria-label={`Delete "${todo.text}"`}
+                  type="button"
+                >✕</button>
               </li>
             )}</For>
           </ul>
 
           <footer class="foot">
-            <span class="count">{remaining()} items left</span>
-            <div class="filters">
-              <button classList={{ active: filter() === 'all' }} onClick={() => setFilter('all')}>All</button>
-              <button classList={{ active: filter() === 'active' }} onClick={() => setFilter('active')}>Active</button>
-              <button classList={{ active: filter() === 'completed' }} onClick={() => setFilter('completed')}>Completed</button>
+            <span class="count" role="status" aria-live="polite">{remaining()} item{remaining() === 1 ? '' : 's'} left</span>
+            <div class="filters" role="group" aria-label="Filter todos">
+              <button 
+                classList={{ active: filter() === 'all' }} 
+                onClick={() => setFilter('all')}
+                aria-pressed={filter() === 'all'}
+                aria-label="Show all todos"
+              >All</button>
+              <button 
+                classList={{ active: filter() === 'active' }} 
+                onClick={() => setFilter('active')}
+                aria-pressed={filter() === 'active'}
+                aria-label="Show active todos"
+              >Active</button>
+              <button 
+                classList={{ active: filter() === 'completed' }} 
+                onClick={() => setFilter('completed')}
+                aria-pressed={filter() === 'completed'}
+                aria-label="Show completed todos"
+              >Completed</button>
             </div>
-            <button class="clear" onClick={clearCompleted}>Clear completed</button>
+            <button class="clear" onClick={clearCompleted} type="button">Clear completed</button>
           </footer>
         </div>
       </section>
 
-      <footer class="note">Beautiful, minimal Todo app built with SolidJS.</footer>
+      <footer class="note">Brutalist todo app with modern design.</footer>
     </div>
   )
 }
