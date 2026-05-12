@@ -1,4 +1,4 @@
-import { createSignal } from 'solid-js';
+import { createSignal, createEffect } from 'solid-js';
 
 /**
  * DatePicker Component
@@ -15,12 +15,20 @@ import { createSignal } from 'solid-js';
  */
 export default function DatePicker(props) {
   const [value, setValue] = createSignal(
-    props.value instanceof Date 
+    props.value instanceof Date && !isNaN(props.value)
       ? props.value.toISOString().split('T')[0]
       : props.value || ''
   );
 
-  const minDate = props.minDate instanceof Date
+  // Track changes to props.value and update internal signal
+  createEffect(() => {
+    const newValue = props.value instanceof Date && !isNaN(props.value)
+      ? props.value.toISOString().split('T')[0]
+      : props.value || '';
+    setValue(newValue);
+  });
+
+  const minDate = props.minDate instanceof Date && !isNaN(props.minDate)
     ? props.minDate.toISOString().split('T')[0]
     : props.minDate || new Date().toISOString().split('T')[0];
 

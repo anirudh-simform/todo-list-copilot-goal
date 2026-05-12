@@ -512,6 +512,7 @@ button {
   border-radius: 2px;
   background-color: var(--bg);
   animation: slideDown var(--duration-normal) var(--easing-bounce);
+  overflow: visible;
 }
 
 .deadline-section-label {
@@ -541,6 +542,7 @@ button {
   border-radius: 2px;
   background-color: var(--bg);
   animation: slideDown var(--duration-normal) var(--easing-bounce);
+  overflow: visible;
 }
 
 .scheduled-date-input-actions {
@@ -560,12 +562,10 @@ button {
   from {
     opacity: 0;
     max-height: 0;
-    overflow: hidden;
   }
   to {
     opacity: 1;
     max-height: 500px;
-    overflow: visible;
   }
 }
 
