@@ -1,8 +1,28 @@
 import { createSignal, createEffect, onMount, For, Show } from 'solid-js'
 import logo from './logo.svg'
 import { formatTime, getDeadlineStatus } from './utils/time'
+import { canCompleteTodo, calculateOverdueStatus, getTodoStatus } from './utils/scheduled-todos'
 import SettingsPanel from './components/SettingsPanel'
 import TimePicker from './components/TimePicker'
+import ScheduledTodoBadge from './components/ScheduledTodoBadge'
+import DatePicker from './components/DatePicker'
+
+/**
+ * TODO Data Structure
+ * 
+ * Existing fields:
+ * - id: number (unique, immutable)
+ * - text: string (todo description)
+ * - completed: boolean (completion status)
+ * - deadline: string | null (time deadline, HH:MM format)
+ * 
+ * New scheduled todos fields (optional):
+ * - scheduledDate: string | undefined (ISO 8601 date when todo should be completed)
+ * - completedAt: string | undefined (ISO 8601 timestamp when marked complete)
+ * - isOverdue: boolean | undefined (true if completed >1 day after scheduledDate)
+ * 
+ * Backward Compatibility: Existing todos without new fields continue to work unchanged.
+ */
 
 export default function App() {
   const [todos, setTodos] = createSignal([])
@@ -15,6 +35,8 @@ export default function App() {
   const [deadline, setDeadline] = createSignal(null)
   const [editingDeadlineId, setEditingDeadlineId] = createSignal(null)
   const [editingDeadlineValue, setEditingDeadlineValue] = createSignal(null)
+  const [showScheduledDateInput, setShowScheduledDateInput] = createSignal(false)
+  const [scheduledDate, setScheduledDate] = createSignal(null)
 
   onMount(() => {
     const saved = localStorage.getItem('solid-todos')
@@ -48,14 +70,52 @@ export default function App() {
     e.preventDefault()
     const value = text().trim()
     if (!value) return
-    setTodos([{ id: Date.now(), text: value, completed: false, deadline: deadline() }, ...todos()])
+    
+    const newTodo = {
+      id: Date.now(),
+      text: value,
+      completed: false,
+      deadline: deadline(),
+      scheduledDate: scheduledDate() ? scheduledDate().toISOString().split('T')[0] + 'T00:00:00Z' : undefined
+    }
+    
+    setTodos([newTodo, ...todos()])
     setText('')
     setDeadline(null)
+    setScheduledDate(null)
     setShowDeadlineInput(false)
+    setShowScheduledDateInput(false)
   }
 
   const toggleTodo = (id) => {
-    setTodos(todos().map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)))
+    const todo = todos().find((t) => t.id === id)
+    if (!todo) return
+
+    // If trying to mark as complete, check if it's allowed (scheduled date constraint)
+    if (!todo.completed) {
+      if (!canCompleteTodo(todo)) {
+        // Show error message to user
+        alert(`This todo is scheduled for a future date. It can only be marked complete on or after that date.`)
+        return
+      }
+    }
+
+    // Toggle completion and handle scheduled todo fields
+    setTodos(todos().map((t) => {
+      if (t.id !== id) return t
+
+      const updated = { ...t, completed: !t.completed }
+
+      // If marking as complete, set completedAt and calculate isOverdue
+      if (!t.completed && updated.completed) {
+        updated.completedAt = new Date().toISOString()
+        if (t.scheduledDate) {
+          updated.isOverdue = calculateOverdueStatus(t.scheduledDate, updated.completedAt)
+        }
+      }
+
+      return updated
+    }))
   }
 
   const removeTodo = (id) => setTodos(todos().filter((t) => t.id !== id))
@@ -144,6 +204,15 @@ export default function App() {
             >
               ⏰
             </button>
+            <button
+              class="btn-deadline-toggle"
+              onClick={() => setShowScheduledDateInput(!showScheduledDateInput())}
+              type="button"
+              aria-label="Add scheduled date"
+              title="Schedule this todo for a specific date"
+            >
+              📅
+            </button>
           </div>
 
           <Show when={showDeadlineInput()}>
@@ -166,17 +235,39 @@ export default function App() {
               </div>
             </div>
           </Show>
+
+          <Show when={showScheduledDateInput()}>
+            <div class="scheduled-date-input-section">
+              <DatePicker
+                value={scheduledDate()}
+                onChange={setScheduledDate}
+                minDate={new Date()}
+                label="Schedule Date"
+              />
+              <div class="scheduled-date-input-actions">
+                <button
+                  class="btn btn-sm"
+                  type="button"
+                  onClick={() => setShowScheduledDateInput(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </Show>
         </form>
 
         <div class="card">
           <ul class="list">
             <For each={filtered()}>{(todo) => (
-              <li classList={{ item: true, completed: todo.completed, 'has-deadline': !!todo.deadline }}>
+              <li classList={{ item: true, completed: todo.completed, 'has-deadline': !!todo.deadline, 'has-scheduled-date': !!todo.scheduledDate }}>
                 <label class="left">
                   <input 
                     type="checkbox" 
                     checked={todo.completed} 
                     onChange={() => toggleTodo(todo.id)}
+                    disabled={!todo.completed && !canCompleteTodo(todo)}
+                    title={!todo.completed && !canCompleteTodo(todo) ? `Available after ${todo.scheduledDate}` : ''}
                     aria-label={`Mark "${todo.text}" as ${todo.completed ? 'incomplete' : 'complete'}`}
                   />
                   <span class="text">{todo.text}</span>
@@ -206,6 +297,8 @@ export default function App() {
                         </span>
                       </div>
                     </Show>
+
+                    <ScheduledTodoBadge todo={todo} />
 
                     <Show when={!todo.deadline && editingDeadlineId() !== todo.id}>
                       <button

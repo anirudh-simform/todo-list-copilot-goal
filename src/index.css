@@ -532,6 +532,23 @@ button {
   justify-content: flex-end;
 }
 
+.scheduled-date-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border: var(--border-width-thin) solid var(--border);
+  border-radius: 2px;
+  background-color: var(--bg);
+  animation: slideDown var(--duration-normal) var(--easing-bounce);
+}
+
+.scheduled-date-input-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+}
+
 .btn-sm {
   min-width: 80px;
   height: 36px;
@@ -1297,4 +1314,112 @@ input[type="checkbox"]:checked ~ .text {
   .settings-panel {
     animation: none;
   }
+}
+
+/* ============================================================================
+   SCHEDULED TODOS — NEW FEATURE
+   ============================================================================ */
+
+/* Date Picker Container */
+.date-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.date-picker-label {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+
+.date-picker-input {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: var(--border-width-thin) solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.date-picker-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Scheduled Todo Badges */
+.scheduled-todo-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.todo-badge-scheduled {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .todo-badge-scheduled {
+  background-color: #0d47a1;
+  color: #81d4fa;
+}
+
+.todo-badge-ready {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .todo-badge-ready {
+  background-color: #1b5e20;
+  color: #81c784;
+}
+
+.todo-badge-on-time {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #f5f5f5;
+  color: #666666;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .todo-badge-on-time {
+  background-color: #424242;
+  color: #bdbdbd;
+}
+
+.todo-badge-overdue {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .todo-badge-overdue {
+  background-color: #b71c1c;
+  color: #ffcdd2;
+}
+
+/* Complete Button Disabled State */
+.todo-complete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--text-muted);
 }
