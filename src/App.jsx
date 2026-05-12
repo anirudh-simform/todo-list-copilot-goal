@@ -1,10 +1,42 @@
-import { createSignal, createEffect, onMount, For } from 'solid-js'
+import { createSignal, createEffect, onMount, For, Show } from 'solid-js'
+import logo from './logo.svg'
+import { formatTime, getDeadlineStatus } from './utils/time'
+import { canCompleteTodo, calculateOverdueStatus, getTodoStatus } from './utils/scheduled-todos'
+import SettingsPanel from './components/SettingsPanel'
+import TimePicker from './components/TimePicker'
+import ScheduledTodoBadge from './components/ScheduledTodoBadge'
+import DatePicker from './components/DatePicker'
+
+/**
+ * TODO Data Structure
+ * 
+ * Existing fields:
+ * - id: number (unique, immutable)
+ * - text: string (todo description)
+ * - completed: boolean (completion status)
+ * - deadline: string | null (time deadline, HH:MM format)
+ * 
+ * New scheduled todos fields (optional):
+ * - scheduledDate: string | undefined (ISO 8601 date when todo should be completed)
+ * - completedAt: string | undefined (ISO 8601 timestamp when marked complete)
+ * - isOverdue: boolean | undefined (true if completed >1 day after scheduledDate)
+ * 
+ * Backward Compatibility: Existing todos without new fields continue to work unchanged.
+ */
 
 export default function App() {
   const [todos, setTodos] = createSignal([])
   const [text, setText] = createSignal('')
   const [filter, setFilter] = createSignal('all')
   const [theme, setTheme] = createSignal('light')
+  const [timeFormat, setTimeFormat] = createSignal('12')
+  const [showSettings, setShowSettings] = createSignal(false)
+  const [showDeadlineInput, setShowDeadlineInput] = createSignal(false)
+  const [deadline, setDeadline] = createSignal(null)
+  const [editingDeadlineId, setEditingDeadlineId] = createSignal(null)
+  const [editingDeadlineValue, setEditingDeadlineValue] = createSignal(null)
+  const [showScheduledDateInput, setShowScheduledDateInput] = createSignal(false)
+  const [scheduledDate, setScheduledDate] = createSignal(null)
 
   onMount(() => {
     const saved = localStorage.getItem('solid-todos')
@@ -16,6 +48,9 @@ export default function App() {
     const savedTheme = localStorage.getItem('solid-theme')
     if (savedTheme) setTheme(savedTheme)
     document.documentElement.setAttribute('data-theme', savedTheme || 'light')
+    
+    const savedTimeFormat = localStorage.getItem('solid-timeFormat')
+    if (savedTimeFormat) setTimeFormat(savedTimeFormat)
   })
 
   createEffect(() => {
@@ -27,16 +62,60 @@ export default function App() {
     document.documentElement.setAttribute('data-theme', theme())
   })
 
+  createEffect(() => {
+    localStorage.setItem('solid-timeFormat', timeFormat())
+  })
+
   const addTodo = (e) => {
     e.preventDefault()
     const value = text().trim()
     if (!value) return
-    setTodos([{ id: Date.now(), text: value, completed: false }, ...todos()])
+    
+    const newTodo = {
+      id: Date.now(),
+      text: value,
+      completed: false,
+      deadline: deadline(),
+      scheduledDate: scheduledDate() ? scheduledDate().toISOString().split('T')[0] + 'T00:00:00Z' : undefined
+    }
+    
+    setTodos([newTodo, ...todos()])
     setText('')
+    setDeadline(null)
+    setScheduledDate(null)
+    setShowDeadlineInput(false)
+    setShowScheduledDateInput(false)
   }
 
   const toggleTodo = (id) => {
-    setTodos(todos().map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)))
+    const todo = todos().find((t) => t.id === id)
+    if (!todo) return
+
+    // If trying to mark as complete, check if it's allowed (scheduled date constraint)
+    if (!todo.completed) {
+      if (!canCompleteTodo(todo)) {
+        // Show error message to user
+        alert(`This todo is scheduled for a future date. It can only be marked complete on or after that date.`)
+        return
+      }
+    }
+
+    // Toggle completion and handle scheduled todo fields
+    setTodos(todos().map((t) => {
+      if (t.id !== id) return t
+
+      const updated = { ...t, completed: !t.completed }
+
+      // If marking as complete, set completedAt and calculate isOverdue
+      if (!t.completed && updated.completed) {
+        updated.completedAt = new Date().toISOString()
+        if (t.scheduledDate) {
+          updated.isOverdue = calculateOverdueStatus(t.scheduledDate, updated.completedAt)
+        }
+      }
+
+      return updated
+    }))
   }
 
   const removeTodo = (id) => setTodos(todos().filter((t) => t.id !== id))
@@ -53,47 +132,229 @@ export default function App() {
 
   const toggleTheme = () => setTheme(theme() === 'light' ? 'dark' : 'light')
 
+  const toggleSettings = () => setShowSettings(!showSettings())
+
+  const handleTimeFormatChange = (format) => {
+    setTimeFormat(format)
+  }
+
+  const startEditingDeadline = (todo) => {
+    setEditingDeadlineId(todo.id)
+    setEditingDeadlineValue(todo.deadline)
+  }
+
+  const saveDeadline = (todoId) => {
+    if (editingDeadlineId() === todoId) {
+      setTodos(todos().map((t) =>
+        t.id === todoId ? { ...t, deadline: editingDeadlineValue() } : t
+      ))
+      setEditingDeadlineId(null)
+      setEditingDeadlineValue(null)
+    }
+  }
+
+  const cancelEditingDeadline = () => {
+    setEditingDeadlineId(null)
+    setEditingDeadlineValue(null)
+  }
+
+  const removeDeadline = (todoId) => {
+    setTodos(todos().map((t) =>
+      t.id === todoId ? { ...t, deadline: null } : t
+    ))
+    setEditingDeadlineId(null)
+    setEditingDeadlineValue(null)
+  }
+
   return (
     <div class="app-root">
       <header class="top">
-        <h1 class="brand">TODO</h1>
-        <button class="theme" onClick={toggleTheme} aria-label={theme() === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
-          {theme() === 'light' ? '🌙' : '☀️'}
-        </button>
+        <div class="brand-container">
+          <img src={logo} alt="Focus Task Tracker Logo" class="brand-logo" />
+          <h1 class="brand">FOCUS</h1>
+        </div>
+        <div class="header-controls">
+          <button class="settings-btn" onClick={toggleSettings} aria-label="Open settings">
+            ⚙️
+          </button>
+          <button class="theme" onClick={toggleTheme} aria-label={theme() === 'light' ? 'Switch to dark mode' : 'Switch to light mode'}>
+            {theme() === 'light' ? '🌙' : '☀️'}
+          </button>
+        </div>
       </header>
 
       <section class="container">
         <form class="add" onSubmit={addTodo}>
-          <input
-            class="input"
-            type="text"
-            placeholder="What needs to be done?"
-            value={text()}
-            onInput={(e) => setText(e.target.value)}
-            aria-label="New todo description"
-          />
-          <button class="btn" aria-label="Add new todo">Add</button>
+          <div class="add-form-main">
+            <input
+              class="input"
+              type="text"
+              placeholder="What needs to be done?"
+              value={text()}
+              onInput={(e) => setText(e.target.value)}
+              aria-label="New todo description"
+            />
+            <button class="btn" aria-label="Add new todo">Add</button>
+            <button
+              class="btn-deadline-toggle"
+              onClick={() => setShowDeadlineInput(!showDeadlineInput())}
+              type="button"
+              aria-label="Add deadline"
+              title="Add a deadline time for this todo"
+            >
+              ⏰
+            </button>
+            <button
+              class="btn-deadline-toggle"
+              onClick={() => setShowScheduledDateInput(!showScheduledDateInput())}
+              type="button"
+              aria-label="Add scheduled date"
+              title="Schedule this todo for a specific date"
+            >
+              📅
+            </button>
+          </div>
+
+          <Show when={showDeadlineInput()}>
+            <div class="deadline-input-section">
+              <label class="deadline-section-label">Set Deadline</label>
+              <TimePicker
+                id="add-todo-deadline"
+                initialTime={deadline() || '09:00'}
+                onChange={setDeadline}
+                ariaLabelledby="deadline-section-label"
+              />
+              <div class="deadline-input-actions">
+                <button
+                  class="btn btn-sm"
+                  type="button"
+                  onClick={() => setShowDeadlineInput(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </Show>
+
+          <Show when={showScheduledDateInput()}>
+            <div class="scheduled-date-input-section">
+              <DatePicker
+                value={scheduledDate()}
+                onChange={setScheduledDate}
+                minDate={new Date()}
+                label="Schedule Date"
+              />
+              <div class="scheduled-date-input-actions">
+                <button
+                  class="btn btn-sm"
+                  type="button"
+                  onClick={() => setShowScheduledDateInput(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </Show>
         </form>
 
         <div class="card">
           <ul class="list">
             <For each={filtered()}>{(todo) => (
-              <li classList={{ item: true, completed: todo.completed }}>
+              <li classList={{ item: true, completed: todo.completed, 'has-deadline': !!todo.deadline, 'has-scheduled-date': !!todo.scheduledDate }}>
                 <label class="left">
                   <input 
                     type="checkbox" 
                     checked={todo.completed} 
                     onChange={() => toggleTodo(todo.id)}
+                    disabled={!todo.completed && !canCompleteTodo(todo)}
+                    title={!todo.completed && !canCompleteTodo(todo) ? `Available after ${todo.scheduledDate}` : ''}
                     aria-label={`Mark "${todo.text}" as ${todo.completed ? 'incomplete' : 'complete'}`}
                   />
                   <span class="text">{todo.text}</span>
                 </label>
-                <button 
-                  class="del" 
-                  onClick={() => removeTodo(todo.id)} 
-                  aria-label={`Delete "${todo.text}"`}
-                  type="button"
-                >✕</button>
+
+                <Show when={!editingDeadlineId() || editingDeadlineId() !== todo.id}>
+                  <div class="right-content">
+                    <Show when={todo.deadline && editingDeadlineId() !== todo.id}>
+                      <div
+                        class={`deadline-badge deadline-status-${getDeadlineStatus(todo.deadline)}`}
+                        onClick={() => startEditingDeadline(todo)}
+                        role="button"
+                        tabindex="0"
+                        aria-label={`Deadline: ${formatTime(todo.deadline, timeFormat())}. Click to edit.`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault()
+                            startEditingDeadline(todo)
+                          }
+                        }}
+                      >
+                        <span class="deadline-time">{formatTime(todo.deadline, timeFormat())}</span>
+                        <span class="deadline-status-label">
+                          {getDeadlineStatus(todo.deadline) === 'overdue' && 'Overdue'}
+                          {getDeadlineStatus(todo.deadline) === 'soon' && 'Soon'}
+                          {getDeadlineStatus(todo.deadline) === 'upcoming' && 'Upcoming'}
+                        </span>
+                      </div>
+                    </Show>
+
+                    <ScheduledTodoBadge todo={todo} />
+
+                    <Show when={!todo.deadline && editingDeadlineId() !== todo.id}>
+                      <button
+                        class="btn-add-deadline"
+                        onClick={() => startEditingDeadline({ ...todo, deadline: '09:00' })}
+                        aria-label="Add deadline"
+                        title="Add a deadline"
+                        type="button"
+                      >
+                        ⏰
+                      </button>
+                    </Show>
+
+                    <button 
+                      class="del" 
+                      onClick={() => removeTodo(todo.id)} 
+                      aria-label={`Delete "${todo.text}"`}
+                      type="button"
+                    >✕</button>
+                  </div>
+                </Show>
+
+                <Show when={editingDeadlineId() === todo.id}>
+                  <div class="deadline-editor">
+                    <TimePicker
+                      id={`deadline-edit-${todo.id}`}
+                      initialTime={editingDeadlineValue() || '09:00'}
+                      onChange={setEditingDeadlineValue}
+                      ariaLabelledby={`deadline-edit-label-${todo.id}`}
+                    />
+                    <div class="deadline-editor-actions">
+                      <button
+                        class="btn btn-sm"
+                        onClick={() => saveDeadline(todo.id)}
+                        type="button"
+                      >
+                        Save
+                      </button>
+                      <button
+                        class="btn btn-sm"
+                        onClick={() => removeDeadline(todo.id)}
+                        type="button"
+                        title="Remove deadline"
+                      >
+                        Remove
+                      </button>
+                      <button
+                        class="btn btn-sm"
+                        onClick={cancelEditingDeadline}
+                        type="button"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                </Show>
               </li>
             )}</For>
           </ul>
@@ -126,6 +387,13 @@ export default function App() {
       </section>
 
       <footer class="note">Brutalist todo app with modern design.</footer>
+
+      <SettingsPanel
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        timeFormat={timeFormat}
+        onTimeFormatChange={handleTimeFormatChange}
+      />
     </div>
   )
 }

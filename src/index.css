@@ -99,7 +99,12 @@ body {
    TYPOGRAPHY
    ============================================================================ */
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-display);
   font-weight: 700;
   margin: 0;
@@ -177,6 +182,30 @@ p {
 
 .brand:hover {
   color: var(--accent-primary);
+}
+
+.brand-container {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-bounce);
+}
+
+.brand-container:hover {
+  color: var(--accent-primary);
+}
+
+.brand-container:hover .brand-logo {
+  color: var(--accent-primary);
+  transform: scale(1.05);
+}
+
+.brand-logo {
+  width: 40px;
+  height: 40px;
+  color: var(--text);
+  transition: all var(--duration-fast) var(--easing-bounce);
 }
 
 /* ============================================================================
@@ -279,6 +308,42 @@ button {
   100% {
     transform: scale(1) rotate(360deg);
   }
+}
+
+/* Header controls container */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.settings-btn {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: transparent;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-bounce);
+}
+
+.settings-btn:hover {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+}
+
+.settings-btn:active {
+  transform: scale(0.95);
+}
+
+.settings-btn:focus-visible {
+  outline: 3px solid var(--accent-secondary);
+  outline-offset: 2px;
 }
 
 /* Delete button */
@@ -398,6 +463,110 @@ button {
   gap: var(--spacing-sm);
   margin-top: var(--spacing-sm);
   margin-bottom: var(--spacing-sm);
+  flex-direction: column;
+}
+
+.add-form-main {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.btn-deadline-toggle {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: transparent;
+  color: var(--text);
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-bounce);
+  flex-shrink: 0;
+}
+
+.btn-deadline-toggle:hover {
+  background-color: var(--accent-secondary);
+  border-color: var(--accent-secondary);
+}
+
+.btn-deadline-toggle:active {
+  transform: scale(0.95);
+}
+
+.btn-deadline-toggle:focus-visible {
+  outline: 3px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.deadline-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border: var(--border-width-thin) solid var(--border);
+  border-radius: 2px;
+  background-color: var(--bg);
+  animation: slideDown var(--duration-normal) var(--easing-bounce);
+  overflow: visible;
+}
+
+.deadline-section-label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin: 0;
+  padding: 0;
+  cursor: default;
+}
+
+.deadline-input-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+}
+
+.scheduled-date-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border: var(--border-width-thin) solid var(--border);
+  border-radius: 2px;
+  background-color: var(--bg);
+  animation: slideDown var(--duration-normal) var(--easing-bounce);
+  overflow: visible;
+}
+
+.scheduled-date-input-actions {
+  display: flex;
+  gap: var(--spacing-sm);
+  justify-content: flex-end;
+}
+
+.btn-sm {
+  min-width: 80px;
+  height: 36px;
+  padding: 0 var(--spacing-sm);
+  font-size: 12px;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    max-height: 0;
+  }
+  to {
+    opacity: 1;
+    max-height: 500px;
+  }
 }
 
 /* ============================================================================
@@ -555,6 +724,114 @@ input[type="checkbox"]:checked ~ .text {
 
 .item.completed {
   opacity: 0.7;
+}
+
+.item.has-deadline {
+  min-height: auto;
+  flex-wrap: wrap;
+}
+
+.right-content {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.deadline-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border: var(--border-width-thin) solid currentColor;
+  border-radius: 2px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--duration-fast) var(--easing-bounce);
+}
+
+.deadline-badge:hover {
+  transform: scale(1.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.deadline-badge:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 1px;
+}
+
+.deadline-status-overdue {
+  color: var(--error);
+  background-color: rgba(255, 0, 110, 0.1);
+}
+
+.deadline-status-soon {
+  color: var(--accent-secondary);
+  background-color: rgba(0, 217, 255, 0.1);
+}
+
+.deadline-status-upcoming {
+  color: var(--text-muted);
+  background-color: transparent;
+  border-color: var(--border);
+}
+
+.deadline-time {
+  font-weight: 700;
+}
+
+.deadline-status-label {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.btn-add-deadline {
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: var(--border-width-thin) solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: transparent;
+  color: var(--text);
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--easing-bounce);
+  flex-shrink: 0;
+}
+
+.btn-add-deadline:hover {
+  background-color: var(--accent-secondary);
+  border-color: var(--accent-secondary);
+}
+
+.btn-add-deadline:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
+}
+
+.deadline-editor {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border: var(--border-width-thin) solid var(--border);
+  border-radius: 2px;
+  background-color: var(--bg);
+  animation: slideDown var(--duration-normal) var(--easing-bounce);
+}
+
+.deadline-editor-actions {
+  display: flex;
+  gap: var(--spacing-xs);
+  justify-content: flex-end;
 }
 
 /* ============================================================================
@@ -732,98 +1009,417 @@ input[type="checkbox"]:checked ~ .text {
   color: var(--text-muted);
   grid-column: 1;
 }
-  cursor: pointer;
+
+/* ============================================================================
+   TIME PICKER
+   ============================================================================ */
+
+.time-picker {
+  display: inline-block;
+  padding: var(--spacing-sm);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--surface);
 }
 
-.card {
-  background: var(--card);
-  border-radius: 14px;
-  padding: 0.5rem 0;
-  box-shadow: var(--shadow);
-  overflow: hidden;
+.time-picker-inputs {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-sm);
+  justify-content: center;
 }
-.list {
-  list-style: none;
-  margin: 0;
+
+.time-input-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.time-input-label {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.time-spinner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: var(--bg);
+  padding: 4px;
+  width: 60px;
+}
+
+.spinner-btn {
+  width: 28px;
+  height: 24px;
   padding: 0;
-}
-.item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.8rem 1rem;
-  border-bottom: 1px solid rgba(15, 23, 42, 0.03);
-}
-.item:last-child {
-  border-bottom: 0;
-}
-.left {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-.left input {
-  width: 18px;
-  height: 18px;
-}
-.text {
-  font-size: 0.98rem;
-}
-.completed .text {
-  opacity: 0.6;
-  text-decoration: line-through;
-}
-.del {
-  background: transparent;
-  border: 0;
-  color: var(--muted);
+  border: none;
+  background-color: transparent;
+  color: var(--text);
+  font-size: 12px;
   cursor: pointer;
-  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast) var(--easing-bounce);
+  border-radius: 2px;
 }
 
-.foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.7rem 1rem;
-  font-size: 0.9rem;
-  color: var(--muted);
-}
-.filters {
-  display: flex;
-  gap: 0.5rem;
-}
-.filters button {
-  background: transparent;
-  border: 0;
-  padding: 0.35rem 0.6rem;
-  border-radius: 8px;
-  cursor: pointer;
-}
-.filters button[active],
-.filters button.active {
-  background: rgba(99, 102, 241, 0.08);
-}
-.clear {
-  background: transparent;
-  border: 0;
-  color: var(--muted);
-  cursor: pointer;
+.spinner-btn:hover {
+  background-color: var(--accent-secondary);
+  color: var(--text);
 }
 
-.note {
-  display: block;
-  margin-top: 1rem;
+.spinner-btn:active {
+  transform: scale(0.9);
+}
+
+.spinner-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
+}
+
+.spinner-up,
+.spinner-down {
+  flex: 1;
+  min-height: 20px;
+  font-weight: 700;
+}
+
+.time-input {
+  width: 100%;
+  height: 32px;
+  padding: 4px 0;
+  border: none;
+  background-color: transparent;
+  color: var(--text);
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
   text-align: center;
-  color: var(--muted);
+  cursor: pointer;
+}
+
+.time-input::-webkit-outer-spin-button,
+.time-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.time-input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.time-input:hover {
+  background-color: var(--accent-secondary);
+  border-radius: 2px;
+}
+
+.time-input:focus {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 1px;
+  background-color: var(--accent-secondary);
+  border-radius: 2px;
+}
+
+.time-separator {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text);
+  padding: 0 4px;
+  line-height: 1;
+}
+
+/* ============================================================================
+   SETTINGS PANEL
+   ============================================================================ */
+
+.settings-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn var(--duration-fast) ease-out;
+}
+
+.settings-panel {
+  width: 90%;
+  max-width: 400px;
+  background-color: var(--surface);
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--border-radius);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideUp var(--duration-normal) var(--easing-bounce);
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm);
+  border-bottom: var(--border-width-thin) solid var(--border);
+}
+
+.settings-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.settings-close {
+  width: 44px;
+  height: 44px;
+  border: var(--border-width) solid var(--border);
+  border-radius: var(--border-radius);
+  background-color: transparent;
+  color: var(--text);
+  font-size: 24px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--duration-fast) var(--easing-bounce);
+}
+
+.settings-close:hover {
+  background-color: var(--accent-primary);
+  border-color: var(--accent-primary);
+  color: var(--surface);
+}
+
+.settings-close:active {
+  transform: scale(0.95);
+}
+
+.settings-close:focus-visible {
+  outline: 3px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+.settings-content {
+  padding: var(--spacing-md);
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.settings-label {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.time-format-group {
+  border: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  cursor: pointer;
+  border: var(--border-width) solid transparent;
+  border-radius: 2px;
+  transition: all var(--duration-fast) ease-out;
+}
+
+.radio-label:hover {
+  background-color: var(--bg);
+  border-color: var(--accent-primary);
+}
+
+.radio-label input[type="radio"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  accent-color: var(--accent-secondary);
+}
+
+.radio-label input[type="radio"]:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.radio-text {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--text);
+}
+
+/* Screen reader only text */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-backdrop,
+  .settings-panel {
+    animation: none;
+  }
+}
+
+/* ============================================================================
+   SCHEDULED TODOS — NEW FEATURE
+   ============================================================================ */
+
+/* Date Picker Container */
+.date-picker-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.date-picker-label {
+  font-weight: bold;
   font-size: 0.9rem;
 }
 
-@media (max-width: 520px) {
-  .input {
-    padding: 0.75rem;
-  }
-  .btn {
-    padding: 0 0.75rem;
-  }
+.date-picker-input {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border: var(--border-width-thin) solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.date-picker-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Scheduled Todo Badges */
+.scheduled-todo-badge {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.todo-badge-scheduled {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #e3f2fd;
+  color: #1565c0;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .todo-badge-scheduled {
+  background-color: #0d47a1;
+  color: #81d4fa;
+}
+
+.todo-badge-ready {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .todo-badge-ready {
+  background-color: #1b5e20;
+  color: #81c784;
+}
+
+.todo-badge-on-time {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #f5f5f5;
+  color: #666666;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .todo-badge-on-time {
+  background-color: #424242;
+  color: #bdbdbd;
+}
+
+.todo-badge-overdue {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #ffebee;
+  color: #c62828;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+[data-theme="dark"] .todo-badge-overdue {
+  background-color: #b71c1c;
+  color: #ffcdd2;
+}
+
+/* Complete Button Disabled State */
+.todo-complete-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: var(--text-muted);
 }
