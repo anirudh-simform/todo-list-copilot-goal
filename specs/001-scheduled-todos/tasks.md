@@ -64,14 +64,14 @@ Implementation of scheduled todos feature in 4 user stories, 2 foundational phas
 
 ### Implementation for User Story 1
 
-- [ ] T012 [P] [US1] Implement `validateScheduledDate(dateString)` in `src/utils/scheduled-todos.js`: validate date is today or future; return error message or null
-- [ ] T013 [P] [US1] Implement `formatScheduledDate(dateString, locale)` in `src/utils/scheduled-todos.js`: return localized date string (e.g., "May 15")
-- [ ] T014 [US1] Extend `src/components/TodoForm.jsx` (or todo creation section in App.jsx): add DatePicker field for optional scheduled date
-- [ ] T015 [US1] Update create todo handler in `src/App.jsx`: accept scheduledDate parameter; validate with `validateScheduledDate()`; store in todo object
-- [ ] T016 [P] [US1] Implement `isScheduledForFuture(todo)` in `src/utils/scheduled-todos.js`: return true if scheduledDate exists and > today
-- [ ] T017 [US1] Extend `src/components/TodoItem.jsx`: render ScheduledTodoBadge component for each todo (shows date if scheduled)
-- [ ] T018 [P] [US1] Add CSS for `.todo-badge-scheduled` in `src/index.css`: blue background, small font, rounded corners
-- [ ] T019 [US1] Test User Story 1: Create todo for tomorrow → verify date badge appears with correct date
+- [x] T012 [P] [US1] Implement `validateScheduledDate(dateString)` in `src/utils/scheduled-todos.js`: validate date is today or future; return error message or null
+- [x] T013 [P] [US1] Implement `formatScheduledDate(dateString, locale)` in `src/utils/scheduled-todos.js`: return localized date string (e.g., "May 15")
+- [x] T014 [US1] Extend `src/components/TodoForm.jsx` (or todo creation section in App.jsx): add DatePicker field for optional scheduled date
+- [x] T015 [US1] Update create todo handler in `src/App.jsx`: accept scheduledDate parameter; validate with `validateScheduledDate()`; store in todo object
+- [x] T016 [P] [US1] Implement `isScheduledForFuture(todo)` in `src/utils/scheduled-todos.js`: return true if scheduledDate exists and > today
+- [x] T017 [US1] Extend `src/components/TodoItem.jsx`: render ScheduledTodoBadge component for each todo (shows date if scheduled)
+- [x] T018 [P] [US1] Add CSS for `.todo-badge-scheduled` in `src/index.css`: blue background, small font, rounded corners
+- [x] T019 [US1] Test User Story 1: Create todo for tomorrow → verify date badge appears with correct date
 
 ---
 

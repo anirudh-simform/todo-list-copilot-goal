@@ -1,9 +1,9 @@
 /**
  * Scheduled Todos Utility Functions
- * 
+ *
  * Pure functions for date validation, formatting, and todo state management.
  * No side effects, fully testable, timezone-aware using device timezone.
- * 
+ *
  * All dates stored as ISO 8601 strings, compared at day-level (not millisecond).
  */
 
@@ -14,10 +14,10 @@
  */
 export function isScheduledForFuture(todo, today = new Date()) {
   if (!todo.scheduledDate) return false;
-  
+
   const scheduled = new Date(todo.scheduledDate);
   const todayNorm = startOfDay(today);
-  
+
   return scheduled > todayNorm;
 }
 
@@ -29,10 +29,10 @@ export function isScheduledForFuture(todo, today = new Date()) {
  */
 export function isTodoDueToday(todo, today = new Date()) {
   if (!todo.scheduledDate) return false;
-  
+
   const scheduled = new Date(todo.scheduledDate);
   const todayNorm = startOfDay(today);
-  
+
   return isSameDay(scheduled, todayNorm);
 }
 
@@ -45,14 +45,14 @@ export function isTodoDueToday(todo, today = new Date()) {
 export function canCompleteTodo(todo, today = new Date()) {
   // Can't complete if already completed
   if (todo.completed) return false;
-  
+
   // If no scheduled date, can always complete
   if (!todo.scheduledDate) return true;
-  
+
   // If scheduled date is in the future, cannot complete
   const scheduled = new Date(todo.scheduledDate);
   const todayNorm = startOfDay(today);
-  
+
   return scheduled <= todayNorm;
 }
 
@@ -64,8 +64,11 @@ export function canCompleteTodo(todo, today = new Date()) {
  */
 export function calculateOverdueStatus(scheduledDate, completedDate) {
   if (!scheduledDate) return false;
-  
-  const daysDiff = daysBetween(new Date(scheduledDate), new Date(completedDate));
+
+  const daysDiff = daysBetween(
+    new Date(scheduledDate),
+    new Date(completedDate),
+  );
   return daysDiff > 1;
 }
 
@@ -77,19 +80,19 @@ export function calculateOverdueStatus(scheduledDate, completedDate) {
  */
 export function getTodoStatus(todo, today = new Date()) {
   if (!todo.completed) {
-    if (!todo.scheduledDate) return 'pending';
-    
+    if (!todo.scheduledDate) return "pending";
+
     const scheduled = new Date(todo.scheduledDate);
     const todayStart = startOfDay(today);
-    
-    if (scheduled > todayStart) return 'scheduled';
-    return 'ready';
+
+    if (scheduled > todayStart) return "scheduled";
+    return "ready";
   }
 
   // completed === true
-  if (!todo.scheduledDate) return 'completed_on_time'; // Unscheduled todos are "on-time"
-  if (todo.isOverdue) return 'completed_overdue';
-  return 'completed_on_time';
+  if (!todo.scheduledDate) return "completed_on_time"; // Unscheduled todos are "on-time"
+  if (todo.isOverdue) return "completed_overdue";
+  return "completed_on_time";
 }
 
 /**
@@ -98,17 +101,17 @@ export function getTodoStatus(todo, today = new Date()) {
  * @param {string} locale - BCP 47 language tag (default: 'en-US')
  * @returns {string} formatted date string (e.g., "May 15")
  */
-export function formatScheduledDate(dateString, locale = 'en-US') {
-  if (!dateString) return '';
-  
+export function formatScheduledDate(dateString, locale = "en-US") {
+  if (!dateString) return "";
+
   try {
     const date = new Date(dateString);
     return date.toLocaleDateString(locale, {
-      month: 'short',
-      day: 'numeric'
+      month: "short",
+      day: "numeric",
     });
   } catch {
-    return '';
+    return "";
   }
 }
 
@@ -120,25 +123,26 @@ export function formatScheduledDate(dateString, locale = 'en-US') {
  */
 export function validateScheduledDate(dateString, today = new Date()) {
   // Undefined is OK (optional field)
-  if (dateString === undefined || dateString === null || dateString === '') return null;
-  
+  if (dateString === undefined || dateString === null || dateString === "")
+    return null;
+
   // Try to parse the date
   let date;
   try {
     date = new Date(dateString);
-    if (isNaN(date.getTime())) throw new Error('Invalid date');
+    if (isNaN(date.getTime())) throw new Error("Invalid date");
   } catch {
-    return 'Invalid date format';
+    return "Invalid date format";
   }
-  
+
   // Check if date is today or in the future
   const todayNorm = startOfDay(today);
   const dateNorm = startOfDay(date);
-  
+
   if (dateNorm < todayNorm) {
-    return 'Scheduled date must be today or in the future';
+    return "Scheduled date must be today or in the future";
   }
-  
+
   return null; // Valid
 }
 
@@ -150,7 +154,9 @@ export function validateScheduledDate(dateString, today = new Date()) {
  */
 function startOfDay(date) {
   const d = new Date(date);
-  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+  return new Date(
+    Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()),
+  );
 }
 
 /**
@@ -161,9 +167,11 @@ function startOfDay(date) {
  * @private
  */
 function isSameDay(date1, date2) {
-  return date1.getUTCFullYear() === date2.getUTCFullYear() &&
-         date1.getUTCMonth() === date2.getUTCMonth() &&
-         date1.getUTCDate() === date2.getUTCDate();
+  return (
+    date1.getUTCFullYear() === date2.getUTCFullYear() &&
+    date1.getUTCMonth() === date2.getUTCMonth() &&
+    date1.getUTCDate() === date2.getUTCDate()
+  );
 }
 
 /**
